@@ -1,6 +1,8 @@
 import fs from 'fs'
 import axios from 'axios'
 
+import { logger } from './index.js'
+
 const servers = JSON.parse(fs.readFileSync('./servers.json')).servers
 
 export let currentlyAvailable = []
@@ -10,13 +12,13 @@ const getHostAndPort = (url) => {
 }
 
 const removeFromAvailable = (error) => {
-    console.log('Service not available:', error.config.url)
+    logger.warn(`Service not available: ${ error.config.url }`,)
     const errorUrl = getHostAndPort(error.config.url)
-    currentlyAvailable = currentlyAvailable.filter(server => server !== errorUrl)
+    currentlyAvailable = currentlyAvailable.filter(server => server.host !== errorUrl)
 }
 
 const addToAvailable = (response) => {
-    console.log(`Service responded ${response.status}:`, response.config.url)
+    logger.info(`Service responded ${response.status}: ${response.config.url}`)
     const successUrl = getHostAndPort(response.config.url)
     if (currentlyAvailable.findIndex(server => server === successUrl) === -1) {
         currentlyAvailable = currentlyAvailable.concat([successUrl])
@@ -24,7 +26,7 @@ const addToAvailable = (response) => {
 } 
 
 const createPromises = () => {
-    const promises = servers.map(server => axios.get(`http://${server}/actuator/health`))
+    const promises = servers.map(server => axios.get(`http://${server.host}${server.health}`))
     return promises.map(promise => promise
         .then(response => addToAvailable(response))
         .catch(error => removeFromAvailable(error)))

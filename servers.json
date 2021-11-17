@@ -1,7 +1,7 @@
 {
     "servers": 
     [
-    "localhost:8080",
-    "localhost:8090"
+    {"host": "localhost:8080", "health": "/actuator/health"},
+    {"host": "localhost:8090", "health": "/actuator/health"}
     ]
 }
