@@ -8,11 +8,14 @@ const servers = JSON.parse(fs.readFileSync('./servers.json')).servers
 export let currentlyAvailable = []
 
 const getHostAndPort = (url) => {
-    return url.substring(7, 21)
+    const parts = url.split('/')
+    // host and the port
+    return parts[2]
 }
 
 const removeFromAvailable = (error) => {
-    logger.warn(`Service not available: ${ error.config.url }`,)
+    console.log(error)
+    logger.warn(`Service not available: ${ error.config.url }`)
     const errorUrl = getHostAndPort(error.config.url)
     currentlyAvailable = currentlyAvailable.filter(server => server.host !== errorUrl)
 }
